@@ -1,0 +1,24 @@
+.gz i.material-icons {
+	font-size : 16px;
+	cursor    : pointer;
+}
+
+.gz li.list-group-item {
+	padding : 8px 16px;
+}
+
+.gz h3 {
+	margin-top : 10px;
+}
+
+.gz a:hover, .gz a:visited, .gz a:link, .gz a:active {
+    text-decoration : none;
+    cursor          : pointer;
+}
+
+.no-selection {
+	-webkit-user-select : none;
+	-moz-user-select    : none;
+	-khtml-user-select  : none;
+	-ms-user-select     : none;
+}

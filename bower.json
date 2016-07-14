@@ -1,0 +1,21 @@
+{
+  "name": "nakautot",
+  "homepage": "https://github.com/nakautot/nakautot.github.com",
+  "description": "",
+  "main": "index.html",
+  "authors": [
+    "nakautot"
+  ],
+  "license": "MIT",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "bootstrap-material-design": "^0.5.10"
+  }
+}
