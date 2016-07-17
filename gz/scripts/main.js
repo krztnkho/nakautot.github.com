@@ -64,8 +64,12 @@ var app    = {};
 				return app.data.watchers[ key ];
 			} ) );
 		},
+		today () {
+			var today = new Date();
+			return [ ( today.getMonth() + 1 ), today.getDate(), today.getFullYear() ].join( '-' );
+		},
 		addWatch ( Userid, Name ) {
-			app.data.watchers[ Userid ] = app.utils.fetch( '/attlogs/' + Userid + '?start=07-15-2016&end=07-15-2016').then( ( res=[] ) => {
+			app.data.watchers[ Userid ] = app.utils.fetch( '/attlogs/' + Userid + '?start=' + app.utils.today() + '&end=' + app.utils.today() ).then( ( res=[] ) => {
 				var parent       = app.utils.getHtmlNode( `#card-id-${Userid} ul.time-list` );
 				parent.innerHTML = '';
 				var time         = 0;
@@ -114,7 +118,7 @@ var app    = {};
 		},
 		employeeCard ( data ) {
 			var timeList = `<ul class="list-group time-list"></ul>`;
-			return `<div class="col-lg-4 watch-cards" id="card-id-${data.Userid}"><div class="well"><h3>${data.Name}</h3><hr/><h1 class="text-center">00:00:00</h1><hr/>${timeList}</div></div>`;
+			return `<div class="col-lg-4 watch-cards" id="card-id-${data.Userid}"><div class="well"><h3>${data.Name}</h3><hr/><h1 class="text-center">00:00:00</h1><hr/>${timeList}</div><div class="clearfix"></div></div>`;
 		},
 		employeeCardItem ( data ) {
 			return `<li class="list-group-item no-selection">${data}</li>`;
@@ -130,6 +134,10 @@ var app    = {};
 				'watched' : [],
 				'watchers' : {}
 			};
+			return app.actions;
+		},
+		setDateToday () {
+			app.utils.replaceHtmlAllData( '#dateToDay', app.utils.today() );
 			return app.actions;
 		},
 		refreshEmployeeList () {
@@ -169,7 +177,7 @@ var app    = {};
 	}
 } )();
 
-app.actions.initialize().refreshEmployeeList();
+app.actions.initialize().setDateToday().refreshEmployeeList();
 
 
 
