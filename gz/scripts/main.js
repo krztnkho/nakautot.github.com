@@ -68,6 +68,9 @@ var app    = {};
 			var today = new Date();
 			return [ ( today.getMonth() + 1 ), today.getDate(), today.getFullYear() ].join( '-' );
 		},
+		toggleClass ( selector, className ) {
+			app.utils.getHtmlNode( selector ).classList.toggle( className );
+		},
 		addWatch ( Userid, Name ) {
 			app.data.watchers[ Userid ] = app.utils.fetch( '/attlogs/' + Userid + '?start=' + app.utils.today() + '&end=' + app.utils.today() ).then( ( res=[] ) => {
 				var parent       = app.utils.getHtmlNode( `#card-id-${Userid} ul.time-list` );
@@ -117,8 +120,9 @@ var app    = {};
 			return `<li class="list-group-item no-selection" id="id-${data.Userid}"><a onclick="app.actions.addWatch(${data.Userid}, '${data.Name}')">${data.Name} <i class="material-icons">${icon}</i></a></li>`;
 		},
 		employeeCard ( data ) {
-			var timeList = `<ul class="list-group time-list"></ul>`;
-			return `<div class="col-lg-4 watch-cards" id="card-id-${data.Userid}"><div class="well"><h3>${data.Name}</h3><hr/><h1 class="text-center">00:00:00</h1><hr/>${timeList}</div><div class="clearfix"></div></div>`;
+			var timeListA = `<div class="toggler-hide hidden"><ul class="list-group time-list"></ul><div class="text-right"><a onclick="app.actions.toggleLogs('#card-id-${data.Userid} .toggler')">[ hide logs ]</a> <a onclick="app.actions.addWatch(${data.Userid}, '${data.Name}')">[ close ]</a></div></div>`
+			var timeListB = `<div class="toggler-view"><div class="text-right"><a onclick="app.actions.toggleLogs('#card-id-${data.Userid} .toggler')">[ view logs ]</a>  <a onclick="app.actions.addWatch(${data.Userid}, '${data.Name}')">[ close ]</a></div></div>`;
+			return `<div class="col-lg-4 watch-cards" id="card-id-${data.Userid}"><div class="well"><h3>${data.Name}</h3><hr/><h1 class="text-center">00:00:00</h1><hr/>${timeListA}${timeListB}</div><div class="clearfix"></div></div>`;
 		},
 		employeeCardItem ( data ) {
 			return `<li class="list-group-item no-selection">${data}</li>`;
@@ -166,6 +170,10 @@ var app    = {};
 			}
 
 			app.actions.start();
+		},
+		toggleLogs ( selector ) {
+			app.utils.toggleClass( selector + '-view', 'hidden' );
+			app.utils.toggleClass( selector + '-hide', 'hidden' );
 		},
 		start () {
 			if ( Object.keys( app.data.watchers ).length ) {
