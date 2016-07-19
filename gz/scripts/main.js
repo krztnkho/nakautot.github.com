@@ -101,13 +101,18 @@ var app    = {};
 		removeWatch ( Userid ) {
 			delete app.data.watchers[ Userid ];
 		},
+		padd ( num ) {
+			let t = '00' + ( num || '' );
+			return t.substring( t.length - 2 );
+		},
 		msToHMS ( ms ) {
 			var seconds = ms / 1000;
 			var hours = parseInt( seconds / 3600 );
 			seconds = seconds % 3600;
 			var minutes = parseInt( seconds / 60 );
 			seconds = seconds % 60;
-			return hours + ':' + minutes + ':' + seconds.toFixed(4);
+			var secStr = seconds.toFixed(4).split( '.' );
+			return app.utils.padd( hours ) + ':' + app.utils.padd( minutes ) + ':' + app.utils.padd( secStr[ 0 ] ) + '.' + secStr[ 1 ];
 		}
 	}
 } )();
