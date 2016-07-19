@@ -22,7 +22,7 @@ var app    = {};
 	app.utils = {
 		fetch ( url ) {
 			return new Promise ( (resolve, reject) => {
-				fetch( gzRoot + url ).then( ( data ) => {
+				fetch( `${gzRoot}${url}` ).then( ( data ) => {
 					data.json().then( resolve, reject );
 				}, reject );
 			} );
@@ -72,7 +72,8 @@ var app    = {};
 			app.utils.getHtmlNode( selector ).classList.toggle( className );
 		},
 		addWatch ( Userid, Name ) {
-			app.data.watchers[ Userid ] = app.utils.fetch( '/attlogs/' + Userid + '?start=' + app.utils.today() + '&end=' + app.utils.today() ).then( ( res=[] ) => {
+			var today = app.utils.today();
+			app.data.watchers[ Userid ] = app.utils.fetch( `/attlogs/${Userid}?start=${today}&end=${today}` ).then( ( res=[] ) => {
 				var parent       = app.utils.getHtmlNode( `#card-id-${Userid} ul.time-list` );
 				parent.innerHTML = '';
 				var time         = 0;
@@ -107,12 +108,14 @@ var app    = {};
 		},
 		msToHMS ( ms ) {
 			var seconds = ms / 1000;
-			var hours = parseInt( seconds / 3600 );
+			var hours = app.utils.padd( parseInt( seconds / 3600 ) );
 			seconds = seconds % 3600;
-			var minutes = parseInt( seconds / 60 );
+			var minutes = app.utils.padd( parseInt( seconds / 60 ) );
 			seconds = seconds % 60;
 			var secStr = seconds.toFixed(4).split( '.' );
-			return app.utils.padd( hours ) + ':' + app.utils.padd( minutes ) + ':' + app.utils.padd( secStr[ 0 ] ) + '.' + secStr[ 1 ];
+			var secOnly = app.utils.padd( secStr[ 0 ] );
+			var secFraction = secStr[ 1 ];
+			return  `${hours}:${minutes}:${secOnly}.${secFraction}`;
 		}
 	}
 } )();
@@ -177,8 +180,8 @@ var app    = {};
 			app.actions.start();
 		},
 		toggleLogs ( selector ) {
-			app.utils.toggleClass( selector + '-view', 'hidden' );
-			app.utils.toggleClass( selector + '-hide', 'hidden' );
+			app.utils.toggleClass( `${selector}-view`, 'hidden' );
+			app.utils.toggleClass( `${selector}-hide`, 'hidden' );
 		},
 		start () {
 			if ( Object.keys( app.data.watchers ).length ) {
