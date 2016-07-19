@@ -71,11 +71,10 @@ var app    = {};
 		toggleClass ( selector, className ) {
 			app.utils.getHtmlNode( selector ).classList.toggle( className );
 		},
-		addWatch ( Userid, Name ) {
+		addWatch ( Userid ) {
 			var today = app.utils.today();
 			app.data.watchers[ Userid ] = app.utils.fetch( `/attlogs/${Userid}?start=${today}&end=${today}` ).then( ( res=[] ) => {
 				app.data.watchLogs[ Userid ] = res;
-				app.utils.updateCount( Userid );
 			} )
 		},
 		formLogs ( Userid ) {
@@ -123,12 +122,28 @@ var app    = {};
 		},
 		countUp () {
 			if ( Object.keys( app.data.watchers ).length ) {
-				setTimeout( () => {
+				if ( app.data.callCount === 700 ) {
+					Object.keys( app.data.watchers ).forEach( ( key ) => {
+						app.utils.updateCount( key );
+						app.utils.addWatch(key);
+					} );
+
+					app.utils.fetchInfo().then( () => {
+						setTimeout( () => {
+							app.utils.countUp();
+						}, 7 );
+					} );
+					app.data.callCount = 0;
+				} else {
 					Object.keys( app.data.watchers ).forEach( ( key ) => {
 						app.utils.updateCount( key );
 					} );
-					app.utils.countUp();
-				}, 7 );
+
+					setTimeout( () => {
+						app.utils.countUp();
+					}, 7 );
+					app.data.callCount++;
+				}
 			}
 		}
 	}
@@ -159,7 +174,8 @@ var app    = {};
 			app.data = {
 				'watched' : [],
 				'watchers' : {},
-				'watchLogs' : {}
+				'watchLogs' : {},
+				'names' : {}
 			};
 			return app.actions;
 		},
@@ -174,6 +190,7 @@ var app    = {};
 					return !app.constants.blockList.includes( user.Name );
 				} ).sort( app.utils.sort( 'Name' ) ).forEach( ( user ) => {
 					app.utils.appendHtmlChild( app.tpl.employeeList( user ), target );
+					app.data.names[ user.Userid ] = user.Name;
 				} );
 			} );
 			return app.actions;
@@ -203,6 +220,7 @@ var app    = {};
 			app.utils.toggleClass( `${selector}-hide`, 'hidden' );
 		},
 		start () {
+			app.data.callCount = 0;
 			if ( Object.keys( app.data.watchers ).length ) {
 				app.utils.fetchInfo().then( () => {
 					app.utils.countUp();
