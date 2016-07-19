@@ -76,31 +76,33 @@ var app    = {};
 			app.data.watchers[ Userid ] = app.utils.fetch( `/attlogs/${Userid}?start=${today}&end=${today}` ).then( ( res=[] ) => {
 				var parent       = app.utils.getHtmlNode( `#card-id-${Userid} ul.time-list` );
 				parent.innerHTML = '';
-				var time         = 0;
-				var lastTime     = new Date();
 
-				res.reduce( ( prev, timeIn, index ) => {
+				res.forEach( ( timeIn ) => {
 					var log  = new Date( timeIn.Checktime );
 					app.utils.appendHtmlChild( app.tpl.employeeCardItem( log.toUTCString() ), parent );
+				} );
 
-					if ( index > 0 && index % 2 !== 0 ) {
-						time += log.getTime() - prev.getTime();
-					}
-
-					lastTime = log;
-					return log;
-				}, null )
-
-				if ( res.length > 0 && res.length % 2 !== 0 ) {
-					var now = new Date();
-					time += ( now.getTime() + 8 * 3600 * 1000 ) - lastTime.getTime();
-				}
-
-				app.utils.getHtmlNode( `#card-id-${Userid} h1.text-center` ).innerHTML = app.utils.msToHMS( time );
+				app.data.watchLogs[ Userid ] = res;
+				app.utils.updateCount( Userid );
 			} )
+		},
+		newClientDate () {
+			var dt = new Date();
+			dt.setTime( dt.getTime() + 8 * 3600 * 1000 );
+			return dt;
+		},
+		updateCount ( Userid ) {
+			var res       = app.data.watchLogs[ Userid ];
+			var start     = res && res.length ? res[ 0 ] : null;
+			var end       = res && res.length % 2 === 0 ? res[ res.length - 1 ] : null;
+			var startTime = start ? new Date( start.Checktime ) : app.utils.newClientDate();
+			var endTime   = end ? new Date( end.Checktime ) : app.utils.newClientDate();
+
+			app.utils.getHtmlNode( `#card-id-${Userid} h1.text-center` ).innerHTML = app.utils.msToHMS( endTime.getTime() - startTime.getTime() );
 		},
 		removeWatch ( Userid ) {
 			delete app.data.watchers[ Userid ];
+			delete app.data.watchLogs[ Userid ];
 		},
 		padd ( num ) {
 			let t = '00' + ( num || '' );
@@ -125,7 +127,7 @@ var app    = {};
 	app.tpl = {
 		employeeList ( data ) {
 			var icon = 'add_circle_outline';
-			return `<li class="list-group-item no-selection" id="id-${data.Userid}"><a onclick="app.actions.addWatch(${data.Userid}, '${data.Name}')">${data.Name} <i class="material-icons">${icon}</i></a></li>`;
+			return `<li class="list-group-item no-selection" id="id-${data.Userid}"><a onclick="app.actions.addWatch('${data.Userid}','${data.Name}')">${data.Name} <i class="material-icons">${icon}</i></a></li>`;
 		},
 		employeeCard ( data ) {
 			var timeListA = `<div class="toggler-hide hidden"><ul class="list-group time-list"></ul><div class="text-right"><a onclick="app.actions.toggleLogs('#card-id-${data.Userid} .toggler')">[ hide logs ]</a> <a onclick="app.actions.addWatch(${data.Userid}, '${data.Name}')">[ close ]</a></div></div>`
@@ -144,7 +146,8 @@ var app    = {};
 		initialize () {
 			app.data = {
 				'watched' : [],
-				'watchers' : {}
+				'watchers' : {},
+				'watchLogs' : {}
 			};
 			return app.actions;
 		},
@@ -186,8 +189,18 @@ var app    = {};
 		start () {
 			if ( Object.keys( app.data.watchers ).length ) {
 				app.utils.fetchInfo().then( () => {
-					// console.log( 'mana ko!' );
+					app.actions.countUp();
 				} );
+			}
+		},
+		countUp () {
+			if ( Object.keys( app.data.watchers ).length ) {
+				setTimeout( () => {
+					Object.keys( app.data.watchers ).forEach( ( key ) => {
+						app.utils.updateCount( key );
+					} );
+					app.actions.countUp();
+				}, 7 );
 			}
 		}
 	}
