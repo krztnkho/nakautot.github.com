@@ -154,11 +154,11 @@ var app    = {};
 	app.tpl = {
 		employeeList ( data ) {
 			var icon = 'add_circle_outline';
-			return `<li class="list-group-item no-selection" id="id-${data.Userid}"><a onclick="app.actions.addWatch('${data.Userid}','${data.Name}')">${data.Name} <i class="material-icons">${icon}</i></a></li>`;
+			return `<li class="list-group-item no-selection" id="id-${data.Userid}"><a onclick="app.actions.addWatch('${data.Userid}')">${data.Name} <i class="material-icons">${icon}</i></a></li>`;
 		},
 		employeeCard ( data ) {
-			var timeListA = `<div class="toggler-hide hidden"><ul class="list-group time-list"></ul><div class="text-right"><a onclick="app.actions.toggleLogs('#card-id-${data.Userid} .toggler','${data.Userid}')">[ hide logs ]</a> <a onclick="app.actions.addWatch(${data.Userid}, '${data.Name}')">[ close ]</a></div></div>`
-			var timeListB = `<div class="toggler-view"><div class="text-right"><a onclick="app.actions.toggleLogs('#card-id-${data.Userid} .toggler','${data.Userid}')">[ view logs ]</a>  <a onclick="app.actions.addWatch(${data.Userid}, '${data.Name}')">[ close ]</a></div></div>`;
+			var timeListA = `<div class="toggler-hide hidden"><ul class="list-group time-list"></ul><div class="text-right"><a onclick="app.actions.toggleLogs('#card-id-${data.Userid} .toggler','${data.Userid}')">[ hide logs ]</a> <a onclick="app.actions.addWatch(${data.Userid})">[ close ]</a></div></div>`
+			var timeListB = `<div class="toggler-view"><div class="text-right"><a onclick="app.actions.toggleLogs('#card-id-${data.Userid} .toggler','${data.Userid}')">[ view logs ]</a>  <a onclick="app.actions.addWatch(${data.Userid})">[ close ]</a></div></div>`;
 			return `<div class="col-lg-4 watch-cards" id="card-id-${data.Userid}"><div class="well"><h3>${data.Name}</h3><hr/><h1 class="text-center">00:00:00</h1><hr/>${timeListA}${timeListB}</div><div class="clearfix"></div></div>`;
 		},
 		employeeCardItem ( data ) {
@@ -195,7 +195,8 @@ var app    = {};
 			} );
 			return app.actions;
 		},
-		addWatch ( Userid, Name ) {
+		addWatch ( Userid ) {
+			var Name   = app.data.names[ Userid ];
 			var cardId = `#card-id-${Userid}`;
 			var listId = `li#id-${Userid} i`;
 
