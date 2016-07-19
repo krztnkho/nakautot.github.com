@@ -74,17 +74,19 @@ var app    = {};
 		addWatch ( Userid, Name ) {
 			var today = app.utils.today();
 			app.data.watchers[ Userid ] = app.utils.fetch( `/attlogs/${Userid}?start=${today}&end=${today}` ).then( ( res=[] ) => {
-				var parent       = app.utils.getHtmlNode( `#card-id-${Userid} ul.time-list` );
-				parent.innerHTML = '';
-
-				res.forEach( ( timeIn ) => {
-					var log  = new Date( timeIn.Checktime );
-					app.utils.appendHtmlChild( app.tpl.employeeCardItem( log.toUTCString() ), parent );
-				} );
-
 				app.data.watchLogs[ Userid ] = res;
 				app.utils.updateCount( Userid );
 			} )
+		},
+		formLogs ( Userid ) {
+			var res          = app.data.watchLogs[ Userid ];
+			var parent       = app.utils.getHtmlNode( `#card-id-${Userid} ul.time-list` );
+			parent.innerHTML = '';
+
+			res.forEach( ( timeIn ) => {
+				var log  = new Date( timeIn.Checktime );
+				app.utils.appendHtmlChild( app.tpl.employeeCardItem( log.toUTCString() ), parent );
+			} );
 		},
 		newClientDate () {
 			var dt = new Date();
@@ -118,6 +120,16 @@ var app    = {};
 			var secOnly = app.utils.padd( secStr[ 0 ] );
 			var secFraction = secStr[ 1 ];
 			return  `${hours}:${minutes}:${secOnly}.${secFraction}`;
+		},
+		countUp () {
+			if ( Object.keys( app.data.watchers ).length ) {
+				setTimeout( () => {
+					Object.keys( app.data.watchers ).forEach( ( key ) => {
+						app.utils.updateCount( key );
+					} );
+					app.utils.countUp();
+				}, 7 );
+			}
 		}
 	}
 } )();
@@ -130,8 +142,8 @@ var app    = {};
 			return `<li class="list-group-item no-selection" id="id-${data.Userid}"><a onclick="app.actions.addWatch('${data.Userid}','${data.Name}')">${data.Name} <i class="material-icons">${icon}</i></a></li>`;
 		},
 		employeeCard ( data ) {
-			var timeListA = `<div class="toggler-hide hidden"><ul class="list-group time-list"></ul><div class="text-right"><a onclick="app.actions.toggleLogs('#card-id-${data.Userid} .toggler')">[ hide logs ]</a> <a onclick="app.actions.addWatch(${data.Userid}, '${data.Name}')">[ close ]</a></div></div>`
-			var timeListB = `<div class="toggler-view"><div class="text-right"><a onclick="app.actions.toggleLogs('#card-id-${data.Userid} .toggler')">[ view logs ]</a>  <a onclick="app.actions.addWatch(${data.Userid}, '${data.Name}')">[ close ]</a></div></div>`;
+			var timeListA = `<div class="toggler-hide hidden"><ul class="list-group time-list"></ul><div class="text-right"><a onclick="app.actions.toggleLogs('#card-id-${data.Userid} .toggler','${data.Userid}')">[ hide logs ]</a> <a onclick="app.actions.addWatch(${data.Userid}, '${data.Name}')">[ close ]</a></div></div>`
+			var timeListB = `<div class="toggler-view"><div class="text-right"><a onclick="app.actions.toggleLogs('#card-id-${data.Userid} .toggler','${data.Userid}')">[ view logs ]</a>  <a onclick="app.actions.addWatch(${data.Userid}, '${data.Name}')">[ close ]</a></div></div>`;
 			return `<div class="col-lg-4 watch-cards" id="card-id-${data.Userid}"><div class="well"><h3>${data.Name}</h3><hr/><h1 class="text-center">00:00:00</h1><hr/>${timeListA}${timeListB}</div><div class="clearfix"></div></div>`;
 		},
 		employeeCardItem ( data ) {
@@ -182,25 +194,19 @@ var app    = {};
 
 			app.actions.start();
 		},
-		toggleLogs ( selector ) {
+		toggleLogs ( selector, Userid ) {
+			if ( app.utils.getHtmlNode( `${selector}-hide` ).classList.contains( 'hidden' ) ) {
+				app.utils.formLogs( Userid )
+			}
+
 			app.utils.toggleClass( `${selector}-view`, 'hidden' );
 			app.utils.toggleClass( `${selector}-hide`, 'hidden' );
 		},
 		start () {
 			if ( Object.keys( app.data.watchers ).length ) {
 				app.utils.fetchInfo().then( () => {
-					app.actions.countUp();
+					app.utils.countUp();
 				} );
-			}
-		},
-		countUp () {
-			if ( Object.keys( app.data.watchers ).length ) {
-				setTimeout( () => {
-					Object.keys( app.data.watchers ).forEach( ( key ) => {
-						app.utils.updateCount( key );
-					} );
-					app.actions.countUp();
-				}, 7 );
 			}
 		}
 	}
